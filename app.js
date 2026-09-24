@@ -96,7 +96,7 @@ window.actualizarVista = function() {
 
   //Detectamos en qué pantalla estamos para definir el límite
   const esAdmin = document.querySelector('.inventory-list') !== null;
-  const itemsPorPagina = esAdmin ? 40 : 10;
+  const itemsPorPagina = esAdmin ? 60 : 30;
 
   // 1. Filtrar
   if (filtroActual !== 'All') {
