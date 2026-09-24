@@ -377,18 +377,19 @@ body {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  width: 100%; /* Le damos permiso de usar todo el ancho de la tarjeta */
+  width: 100%;
+  overflow: hidden; /* Agrega esta línea para que el texto largo no rompa la tarjeta al moverse */
 }
 
 .album-title {
   font-size: 14px;
   font-weight: bold;
   color: #ffffff;
-  /* Las tres líneas mágicas para el corte */
+  
+  /* Reemplaza las líneas mágicas por estas: */
+  display: inline-block;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+  ani
 
 .album-price {
   font-size: 14px;
@@ -401,6 +402,15 @@ body {
   text-align: left;
 }
 
+@keyframes deslizarTexto {
+  0%, 15% { 
+    transform: translateX(0); 
+  }
+  85%, 100% { 
+    transform: translateX(-35%); 
+  }
+}  
+  
 /* =========================================
    PANTALLA DE PUNTO DE VENTA (POS)
    ========================================= */
