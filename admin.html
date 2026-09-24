@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOVE & HATE | STOCK</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Menú Lateral Oculto (Ahora dentro del body) -->
+  <aside class="sidebar" id="sidebar">
+    <button class="close-btn" id="closeMenu">✕</button>
+    
+    <div class="sidebar-top">
+      <div class="logo">
+        <h1 class="red-text">LOVE & HATE</h1>
+        <h2>POS & STOCK</h2>
+      </div>
+      <!-- Enlaces de navegación del Admin -->
+      <nav class="menu" style="margin-top: 40px;">
+        <!-- El enlace a la caja registradora -->
+        <a href="pos.html" class="menu-btn" style="text-decoration: none; display: block;">POS</a>
+        <!-- El enlace al inventario (con la clase 'active' porque estamos en esta página) -->
+        <a href="#" class="menu-btn active" style="text-decoration: none; display: block;">Stock</a>
+        <!-- El enlace al Corte de Caja  -->
+        <a href="corte.html" class="menu-btn" style="text-decoration: none; display: block;">Corte</a>
+        
+      </nav>
+    </div>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="admin-user">
+        <p>👤 MIGUEL NEG</p>
+        <p class="red-text italic">Admin View</p>
+      </div>
+      <div class="admin-actions">
+        <a href="index.html" class="action-link">⟵ Menu View</a>
+        <button class="action-link log-off">Log Off</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Contenedor maestro de toda la app -->
+  <div class="app-container">
+    <!-- ÁREA PRINCIPAL DERECHA -->
+    <main class="main-content">
+      
+      <!-- Barra superior -->
+      <header class="top-bar">
+        <button class="hamburger-btn" id="openMenu">☰</button>
+        <input type="text" class="search-input" placeholder="🔍 SEARCH" autofocus>
+      </header>
+
+      <!-- BOTONES DE CATEGORÍAS -->
+      <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <!-- Agregamos "All" como botón activo inicial -->
+        <button class="filter-btn active" onclick="cambiarFiltro('All', this)">All</button>
+        <button class="filter-btn" onclick="cambiarFiltro('CD\'s', this)">CD's</button>
+        <button class="filter-btn" onclick="cambiarFiltro('Vinyl', this)">Vinilos</button>
+        <button class="filter-btn" onclick="cambiarFiltro('Shirt', this)">Playeras</button>
+        <button class="add-btn" id="btnAbrirModalNuevo">Add +</button>
+      </div>
+
+    <!-- Aquí se inyectan las tarjetas desde app.js -->
+    <div class="inventory-list"></div>
+
+    <!-- NUEVO: CONTENEDOR PARA LOS NÚMEROS DE PÁGINA -->
+    <div id="paginacion" style="display: flex; justify-content: center; gap: 10px; margin-top: 30px; margin-bottom: 40px;"></div>
+
+    </main>
+  </div>
+
+  <!-- Modal para Agregar Nuevo Artículo -->
+  <div id="modalNuevoItem" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <button class="close-modal" id="cerrarModalNuevo">✕</button>
+      <h2 style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">Nuevo Artículo</h2>
+      
+      <!-- 1. CATEGORÍA (Manda sobre el resto del formulario) -->
+      <div class="input-group">
+        <label>Categoría</label>
+        <select id="nuevaCategoria" class="category-select" onchange="alternarCampos(this.value)">
+            <option value="Vinyl">Vinilos</option>
+            <option value="CD's">CD's</option>
+            <option value="Shirt">Playeras</option>
+        </select>
+      </div>
+
+      <!-- CONTENEDOR EXCLUSIVO PARA MÚSICA -->
+      <div id="camposMusica">
+        <div class="input-group">
+          <label class="red-text">Código de barras (Discogs):</label>
+          <input type="text" id="discogsScanner" placeholder="Ej: 88985348451" style="border: 1px solid red;">
+        </div>
+        <div class="input-group">
+          <label>Valor de Mercado Sugerido (MXN)</label>
+          <div class="suggested-prices" style="background: #000; padding: 10px;">
+            Min: $<span id="lblMin">0</span> | Med: $<span id="lblMed">0</span> | Max: $<span id="lblMax">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTENEDOR EXCLUSIVO PARA ROPA (Oculto por defecto) -->
+      <div id="camposRopa" style="display: none;">
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+          <div class="input-group" style="flex: 1; margin-bottom: 0;">
+            <label>Talla</label>
+            <select id="nuevaTalla" style="width: 100%; padding: 8px;">
+              <option value="S">S</option>
+              <option value="M">M</option>
+              <option value="L">L</option>
+            </select>
+          </div>
+          <div class="input-group" style="flex: 1; margin-bottom: 0;">
+            <label>Color</label>
+            <input type="text" id="nuevoColor" placeholder="Ej: Negro" style="width: 100%; padding: 8px;">
+          </div>
+          <div class="input-group" style="flex: 1; margin-bottom: 0;">
+            <label>Tipo</label>
+            <select id="nuevoTipoRopa" style="width: 100%; padding: 8px;">
+              <option value="Manga Corta">Corta</option>
+              <option value="Manga Larga">Larga</option>
+              <option value="Hoodie">Hoodie</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <!-- CAMPOS GENERALES PARA TODOS -->
+      <div class="input-group">
+        <label>Nombre del Artículo</label>
+        <input type="text" id="nuevoNombre" placeholder="Ej: Caifanes - El Silencio">
+      </div>
+      
+      <div class="input-group">
+        <label>Precio</label>
+        <input type="number" id="nuevoPrecioFinal">
+      </div>
+
+      <button id="btnGuardarSupabase" class="checkout-btn" style="margin-top: 20px;">GUARDAR EN STOCK</button>
+    </div>
+  </div>
+
+ <!-- Modal para EDITAR un artículo existente -->
+  <div id="modalEditarItem" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <button class="close-modal" onclick="document.getElementById('modalEditarItem').style.display='none'">✕</button>
+      <h2 style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">Editar Artículo</h2>
+      
+      <div class="input-group">
+        <label>Categoría</label>
+        <select id="editCategoria" class="category-select" onchange="alternarCamposEdicion(this.value)">
+            <option value="Vinyl">Vinilos</option>
+            <option value="CD's">CD's</option>
+            <option value="Shirt">Playeras</option>
+        </select>
+      </div>
+
+      <!-- CONTENEDOR EXCLUSIVO PARA MÚSICA -->
+      <div id="editCamposMusica">
+        <div class="input-group">
+          <label>Código de barras (Discogs)</label>
+          <input type="text" id="editBarcode">
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>Nombre del Artículo</label>
+        <input type="text" id="editNombre">
+      </div>
+      
+      <!-- CONTENEDOR EXCLUSIVO PARA ROPA -->
+      <div id="editCamposRopa" style="display: none;">
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+          <div class="input-group" style="flex: 1; margin-bottom: 0;">
+            <label>Talla</label>
+            <select id="editTalla" style="width: 100%; padding: 8px;">
+              <option value="S">S</option>
+              <option value="M">M</option>
+              <option value="L">L</option>
+              <option value="XL">XL</option>
+            </select>
+          </div>
+          <div class="input-group" style="flex: 1; margin-bottom: 0;">
+            <label>Color</label>
+            <input type="text" id="editColor" style="width: 100%; padding: 8px;">
+          </div>
+          <div class="input-group" style="flex: 1; margin-bottom: 0;">
+            <label>Tipo</label>
+            <select id="editTipoRopa" style="width: 100%; padding: 8px;">
+              <option value="Manga Corta">Corta</option>
+              <option value="Manga Larga">Larga</option>
+              <option value="Hoodie">Hoodie</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>URL de Imagen (Opcional)</label>
+        <input type="text" id="editImagen">
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <div class="input-group" style="flex: 1;">
+          <label>Precio de Venta</label>
+          <input type="number" id="editPrecio">
+        </div>
+        <div class="input-group" style="flex: 1;">
+          <label>Stock Disponible</label>
+          <input type="number" id="editStock">
+        </div>
+      </div>
+
+      <button id="btnGuardarEdicion" class="checkout-btn" style="margin-top: 20px; background-color: #00aa00; color: white; border: none;">ACTUALIZAR ARTÍCULO</button>
+    </div>
+  </div>
+  
+  <!-- Librería de Supabase requerida para que app.js no falle -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+</body>
+</html>

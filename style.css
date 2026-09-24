@@ -1,0 +1,959 @@
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:ital,wght@0,200..800;1,200..800&display=swap');
+
+/* Reseteo básico y colores generales */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Atkinson Hyperlegible Mono", monospace;
+  font-optical-sizing: auto;
+  font-weight: 400; /* Ajusta el grosor usando valores del 200 al 800 */
+  font-style: normal;
+}
+
+body {
+  background-color: #0a0a0a; /* Fondo oscuro */
+  color: #ffffff;
+}
+
+.red-text {
+  color: #ff0000; /* El rojo característico de LOVE & HATE */
+}
+
+/* El Layout Principal (Dividir la pantalla en dos) */
+.app-container {
+  display: flex;
+  height: 100vh; /* Ocupa el 100% de la altura de la pantalla */
+}
+
+/* --- AJUSTES DEL PANEL LATERAL (MODO HAMBURGUESA) --- */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0; /* Lo anclamos estrictamente al borde izquierdo */
+  width: 180px; /* Ancho en escritorio */
+  height: 100vh;
+  background-color: #000000;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid #333;
+  transform: translateX(-100%);
+  z-index: 1000; /* Asegura que flote por encima de todo */
+  transition: left 0.3s ease; /* Animación suave al abrir/cerrar */
+}
+
+/* Esta clase se activará con JavaScript */
+.sidebar.open {
+  transform: translateX(0); /* Lo regresa a su posición visible en la pantalla */
+}
+
+/* Botón de cerrar dentro del menú */
+.close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 1.5rem;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  color: #ff0000;
+}
+
+/* --- BARRA SUPERIOR Y HAMBURGUESA --- */
+.top-bar {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.hamburger-btn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 28px;
+  cursor: pointer;
+  padding: 0 10px 0 0;
+}
+
+.sidebar-top {
+  display: flex;
+  margin-top: 40px;
+  flex-direction: column;
+  gap: 40px; /* Empuja el menú hacia abajo del logo sin mandarlo al centro */
+}
+
+/* Evita que LOVE & HATE se corte en varias líneas */
+.logo h1 {
+  font-size: 1.2rem;
+  padding-right: 15px;
+  line-height: 1.2;
+  white-space: nowrap; 
+}
+
+.logo h2 {
+  font-size: 1rem;
+  margin-top: 5px;
+}
+
+/* --- BOTONES POS Y STOCK --- */
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.menu-btn {
+  background-color: transparent;
+  color: #ffffff;
+  border: none;
+  padding: 12px 15px; /* Hace los botones más altos y anchos */
+  text-align: left; /* Alinea el texto a la izquierda */
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px; /* Un ligero borde redondeado */
+  text-decoration: none; /* Quita el subrayado de los enlaces */
+  display: block; /* Asegura que el área de clic ocupe todo el ancho */
+}
+
+/* El estilo de la pestaña seleccionada (Gris oscuro como en Illustrator) */
+.menu-btn.active {
+  background-color: #333333; 
+}
+
+.menu-btn:hover:not(.active) {
+  background-color: #1a1a1a; /* Un gris muy tenue al pasar el mouse */
+}
+
+/* --- BOTONES DE SALIDA (Log Off / Menu View) --- */
+.sidebar-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.admin-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+  border-top: 1px solid #333; /* Una línea sutil para separar el usuario de la salida */
+  padding-top: 15px;
+}
+
+.action-link {
+  background: none;
+  border: none;
+  color: #888888; /* Texto gris para que no compita con el menú principal */
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none; /* Quita el subrayado del enlace */
+}
+
+.action-link:hover {
+  color: #ffffff; /* Se ilumina de blanco al pasar el mouse */
+}
+
+/* Solo para que el botón de salir resalte un poco en rojo al pasar el mouse */
+.log-off:hover {
+  color: #ff0000;
+}
+
+/* Área Derecha */
+.main-content {
+  flex: 1; /* Toma todo el espacio sobrante */
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Separación entre buscador, filtros y lista */
+}
+
+/* Estilo de la fila de inventario (para que quede horizontal) */
+.item-row {
+  display: flex;
+  background-color: #1a1a1a;
+  padding: 15px;
+  border-radius: 5px;
+  gap: 15px;
+  align-items: center;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group input {
+  background-color: #ffffff;
+  color: #000;
+  border: none;
+  padding: 8px;
+  font-weight: bold;
+}
+
+/* --- ÁREA PRINCIPAL (MAIN CONTENT) --- */
+
+/* 1. La Barra de Búsqueda */
+.search-input {
+  width: 100%;
+  max-width: 400px;
+  background-color: #333333; /* Fondo gris oscuro */
+  color: #ffffff;
+  border: none;
+  padding: 12px 15px;
+  font-size: 18px;
+  border-radius: 4px;
+  outline: none; /* Quita el borde azul que sale al hacer clic */
+}
+
+/* 2. Filtros y Categorías (Los "Chips") */
+.filters {
+  display: flex;
+  gap: 10px; /* Separación entre cada botón */
+}
+
+.chip {
+  background-color: #333333;
+  color: #ffffff;
+  border: none;
+  padding: 8px 15px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+/* El botón seleccionado (Verde) */
+.chip.active {
+  background-color: #ffffff; 
+  color: #000000;
+}
+
+/* El botón de agregar */
+.chip.add-category, 
+.chip.add-to-ticket {
+  background-color: #37ff8e;
+  color: #000000;
+}
+
+/* 3. La Fila de Inventario */
+.item-row {
+  display: flex;
+  background-color: #222222; /* Fondo de la tarjeta */
+  padding: 15px 20px;
+  border-radius: 5px;
+  gap: 20px;
+  align-items: center; /* Centra todo verticalmente */
+  border: 1px solid #333;
+}
+
+/* El ícono del disco */
+.icon-disc {
+  font-size: 24px;
+}
+
+/* Los grupos de textos y etiquetas */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* Las palabras "Categoría", "Nombre", "Precio" */
+.input-group label {
+  font-size: 12px;
+  color: #aaaaaa;
+}
+
+/* Las cajas blancas donde escribes */
+.input-group input {
+  background-color: #ffffff;
+  color: #000000;
+  border: none;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 2px;
+  outline: none;
+}
+
+/* 4. El truco para cortar los nombres largos con "..." */
+.nombre-largo input {
+  width: 250px; /* Le damos un ancho fijo para obligarlo a cortar */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.input-group select {
+  background-color: #ffffff;
+  color: #000000;
+  border: none;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* --- PANEL DE REFERENCIA DISCOGS --- */
+.discogs-reference {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-left: auto; /* Esto empuja la caja pegándola al extremo derecho de la fila */
+}
+
+.discogs-reference label {
+  font-size: 12px;
+  color: #aaaaaa;
+}
+
+.suggested-prices {
+  display: flex;
+  gap: 15px; /* Separación entre min, med y max */
+  background-color: #111111; /* Fondo súper oscuro para contrastar */
+  padding: 8px 12px;
+  border-radius: 2px;
+  font-size: 13px;
+  border: 1px dashed #444444; /* Borde técnico tipo "solo lectura" */
+}
+
+.price-min, .price-max {
+  color: #777777; /* Los extremos en gris para no distraer */
+}
+
+.price-med {
+  color: #ffffff; /* El precio medio en blanco puro */
+  font-weight: bold; /* Resaltado, ya que es el valor más realista a cobrar */
+}
+
+/* --- VISTA PÚBLICA (MENU VIEW) --- */
+
+.catalog-grid {
+  display: grid;
+  /* Crea columnas automáticas que miden mínimo 250px y máximo lo que sobre */
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.album-card {
+  background-color: #222222;
+  border-radius: 4px;
+  overflow: hidden; /* Corta las esquinas de la imagen si se salen */
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #333;
+}
+
+/* La Portada */
+.album-cover {
+  width: 100%;
+  aspect-ratio: 1 / 1; /* Obliga a la foto a ser un cuadrado perfecto */
+  object-fit: cover; /* Recorta la imagen sin deformarla */
+  display: block;
+}
+
+/* El cuadro de texto debajo de la portada */
+.album-info {
+  padding: 12px 15px;
+  display: flex;
+  flex-direction: column; /* Apila los elementos verticalmente */
+  align-items: flex-start; /* Alinea todo a la izquierda */
+  gap: 8px; /* Espacio entre el bloque de texto y el letrero de stock */
+}
+
+.album-text {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%; /* Le damos permiso de usar todo el ancho de la tarjeta */
+}
+
+.album-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffffff;
+  /* Las tres líneas mágicas para el corte */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.album-price {
+  font-size: 14px;
+  color: #aaaaaa;
+}
+
+.stock-status {
+  font-size: 12px;
+  font-weight: bold;
+  text-align: left;
+}
+
+/* =========================================
+   PANTALLA DE PUNTO DE VENTA (POS)
+   ========================================= */
+
+.pos-layout {
+  display: flex;
+  flex-direction: row; /* Fuerza a que sea izquierda y derecha */
+  padding: 0; 
+  height: 100vh;
+}
+
+/* Izquierda: Área de búsqueda */
+.pos-search-area {
+  flex: 1; /* Toma todo el espacio disponible */
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pos-item-name {
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.pos-item-price {
+  color: #ffffff;
+  font-size: 18px;
+  margin-left: auto; /* Empuja el precio y botón a la derecha */
+  margin-right: 20px;
+}
+
+.pos-cart {
+  width: 350px; /* Ancho fijo para que no se estire */
+  min-width: 350px; /* Evita que se aplaste */
+  background-color: #111111;
+  border-left: 1px solid #333333;
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-title {
+  color: #ffffff;
+  font-size: 18px;
+  padding: 20px;
+  border-bottom: 1px solid #333333;
+}
+
+.cart-items {
+  flex: 1; /* Empuja los totales hacia abajo */
+  overflow-y: auto; /* Permite hacer scroll si el cliente compra muchos discos */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.cart-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px dashed #333333;
+  padding-bottom: 10px;
+}
+
+.cart-row-title {
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.cart-row-category {
+  color: #777777;
+  font-size: 12px;
+}
+
+.cart-row-price {
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.cart-remove {
+  background: none;
+  border: none;
+  color: #777777;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.cart-remove:hover {
+  color: #ff0000;
+}
+
+/* La zona de cobro final */
+.cart-totals {
+  background-color: #0a0a0a;
+  padding: 20px;
+  border-top: 1px solid #333333;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  color: #aaaaaa;
+  font-size: 14px;
+}
+
+.grand-total {
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.checkout-btn {
+  background-color: #ffffff;
+  color: #000000;
+  border: none;
+  padding: 15px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.checkout-btn:hover {
+  background-color: #37ff8e;
+}
+
+/* --- FILTROS PÚBLICOS DESLIZABLES --- */
+.public-filters {
+  display: flex;
+  gap: 10px;
+  padding: 15px 0; /* Espacio arriba y abajo */
+  overflow-x: auto; /* Permite arrastrar con el dedo horizontalmente */
+  scrollbar-width: none; /* Oculta la barra gris fea en Firefox */
+}
+
+/* Oculta la barra gris fea en Chrome y Safari */
+.public-filters::-webkit-scrollbar {
+  display: none; 
+}
+
+/* --- CONTROLES DE PAGINACIÓN --- */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 40px;
+  padding-bottom: 40px;
+}
+
+.page-btn {
+  background-color: transparent;
+  color: #ffffff;
+  border: 1px solid #333333;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.page-btn:hover {
+  border-color: #777777;
+}
+
+.page-btn.active {
+  background-color: #ffffff;
+  color: #000000;
+  font-weight: bold;
+  border-color: #ffffff;
+}
+
+.page-dots {
+  color: #777777;
+}
+
+/* =========================================
+   PANTALLA DE LOGIN
+   ========================================= */
+
+.login-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #000000;
+  margin: 0;
+}
+
+.login-container {
+  background-color: #111111;
+  border: 1px solid #333333;
+  border-radius: 4px;
+  padding: 40px;
+  width: 100%;
+  max-width: 400px; /* Evita que se estire demasiado en monitores grandes */
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.login-header {
+  text-align: center;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Reutilizamos el estilo rojo de checkout, pero con un toque extra */
+.login-btn {
+  margin-top: 10px;
+}
+
+.back-link {
+  color: #777777;
+  text-decoration: none;
+  font-size: 14px;
+  text-align: center;
+  display: block;
+  margin-top: 10px;
+}
+
+.back-link:hover {
+  color: #ffffff;
+}
+
+/* =========================================
+   MODAL DE CREACIÓN DE INVENTARIO
+   ========================================= */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #111;
+  border: 1px solid #333;
+  padding: 30px;
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+  border-radius: 8px;
+}
+
+.close-modal {
+  position: absolute;
+  top: 15px; right: 15px;
+  background: none; border: none;
+  color: white; font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* =========================================
+   VISTA DE LISTA PARA ADMIN (STOCK)
+   ========================================= */
+.inventory-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 20px;
+}
+
+.item-row {
+  display: flex;
+  align-items: center;
+  background-color: #1a1a1a;
+  padding: 10px 15px;
+  border-radius: 6px;
+  gap: 15px;
+  border: 1px solid #333;
+}
+
+.row-image img {
+  width: 45px;
+  height: 45px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #444;
+}
+
+.row-data {
+  display: flex;
+  flex: 1;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.row-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.name-col {
+  flex: 2; /* Le da más espacio al nombre para que no se corte */
+}
+
+.col-label {
+  font-size: 10px;
+  color: #888;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.col-value {
+  font-size: 14px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.edit-btn {
+  background: transparent;
+  color: #ffaa00;
+  border: 1px solid #ffaa00;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.edit-btn:hover {
+  background: #ffaa00;
+  color: #000;
+}
+
+/* =========================================
+   TARJETAS COMPACTAS PARA PUNTO DE VENTA (POS)
+   ========================================= */
+.catalog-grid.pos-compact-grid {
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 15px;
+  align-items: stretch;   /* Hace que las tarjetas de la MISMA FILA midan lo mismo */
+  align-content: start;   /* CLAVE: Empuja todo hacia arriba y evita que se estiren al infinito */
+}
+
+.pos-compact-grid .album-card {
+  height: 100%; /* CAMBIO: Obliga a la tarjeta a llenar la celda */
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.pos-compact-grid .album-cover {
+  height: 140px;
+  width: 100%;
+  object-fit: cover; /* Asegura que la imagen no se deforme */
+  border-radius: 4px 4px 0 0;
+  background-color: #222; /* Fondo por si la imagen tarda en cargar */
+}
+
+.pos-compact-grid .album-info {
+  padding: 10px;
+  display: flex;
+  flex-direction: 1; /* CAMBIO: Hace que esta sección crezca para rellenar el espacio vacío */
+}
+
+.pos-compact-grid .album-title {
+  font-size: 12px; 
+  line-height: 1.3;
+  margin-bottom: 6px;
+  /* Limita el texto a 2 líneas y pone "..." si es muy largo */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pos-compact-grid .album-price {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Truncar nombres muy largos en el panel de Stock */
+.name-col .col-value {
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Máximo 2 líneas */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word; /* Evita que palabras largas se salgan de la caja */
+}
+
+/* =========================================
+   FILTROS Y PAGINACIÓN
+   ========================================= */
+.filter-btn {
+  background-color: #333;
+  color: #fff;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.filter-btn.active {
+  background-color: #37ff8e; /* Verde brillante cuando está seleccionado */
+  color: #000000;
+}
+
+.filter-btn:hover {
+  background-color: #444;
+}
+
+.page-btn {
+  background-color: #222;
+  color: #fff;
+  border: 1px solid #444;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.page-btn.active {
+  background-color: #37ff8e;
+  border-color: #37ff8e;
+  color: #000;
+}
+
+/* =========================================
+   BOTÓN AGREGAR STOCK
+   ========================================= */
+.add-btn {
+  background-color: #37ff8e;
+  color: #000;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+  margin-left: auto; /* Esto empuja el botón a la derecha del todo si hay espacio */
+}
+
+.add-btn:hover {
+  background-color: #2ce67a;
+}
+
+.col-extras {
+  display: flex;
+  flex-wrap: wrap; 
+  gap: 10px;
+}
+
+/* =========================================
+   1. ALINEACIÓN RÍGIDA (TABLETS Y ESCRITORIO)
+   Usamos MIN-width para que solo afecte a pantallas grandes
+   ========================================= */
+@media (min-width: 768px) {
+  .col-cat { width: 90px !important; flex: none !important; }
+  .col-name { flex: 1 !important; min-width: 180px; padding-right: 20px; }
+  .col-price { width: 100px !important; flex: none !important; }
+  .col-stock { width: 60px !important; flex: none !important; }
+  .col-extras { width: 280px !important; flex: none !important; flex-wrap: nowrap; gap: 15px; }
+  .col-btn { width: 100px !important; flex: none !important; text-align: right; }
+}
+
+/* =========================================
+   DISEÑO RESPONSIVO (SOLO PARA CELULARES)
+   ========================================= */
+
+@media (max-width: 768px) {
+  
+  /* 1. Apila la información de la fila de inventario en forma de "=" */
+  .item-row {
+    flex-direction: row; /* Mantiene la imagen a la izquierda */
+    align-items: flex-start;
+  }
+
+  .row-data {
+    flex-wrap: wrap; /* Permite que el contenido baje a la siguiente línea */
+    gap: 12px 10px;
+    width: 100%;
+  }
+
+  .name-col {
+    flex: 0 0 100%; /* Obliga al nombre a tomar su propia línea entera */
+    order: -1;      /* Lo mueve hasta la parte superior */
+  }
+
+  .row-col {
+    flex: 1;
+    min-width: 40%; /* Forma una cuadrícula compacta para Categoría, Precio y Stock */
+  }
+
+  .row-col:last-child {
+    flex: 0 0 100%; /* El botón de editar toma toda la línea inferior */
+    margin-top: 5px;
+  }
+
+  /* 2. Oculta el ícono del CD para ahorrar espacio valioso en la pantalla */
+  .icon-disc {
+    display: none; 
+  }
+
+  /* 3. Obliga a las cajas de texto a estirarse de lado a lado */
+  .input-group, 
+  .nombre-largo input {
+    width: 100%; 
+  }
+
+  /* 4. Acomoda el panel de precios sugeridos de Discogs */
+  .discogs-reference {
+    margin-left: 0; /* Quita el empuje hacia la derecha */
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  .suggested-prices {
+    justify-content: space-between; /* Reparte los precios uniformemente */
+  }
+
+  /* --- Ajuste POS para Celulares --- */
+  .pos-layout {
+    flex-direction: column; /* Aquí sí le decimos que se apile hacia abajo */
+    height: auto;
+  }
+  
+  .pos-search-area {
+    padding: 15px;
+  }
+  
+  .pos-cart {
+    width: 100%; /* En celular sí toma todo el ancho */
+    border-left: none;
+    border-top: 1px solid #333333;
+  }
+
+  .sidebar {
+    width: 100vw; /* 100% del ancho de la pantalla (Viewport Width) */
+  }
+  
+  /* Opcionalmente, puedes volver a hacer el texto más grande en móvil 
+     ya que tendrás toda la pantalla disponible */
+  .sidebar .logo h1 {
+    font-size: 1.8rem;
+  }
+
+}
+

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOVE & HATE | MENU</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<!-- Menú Lateral Oculto -->
+<aside class="sidebar" id="sidebar">
+  <button class="close-btn" id="closeMenu">✕</button>
+  
+  <div class="sidebar-top">
+    <div class="logo">
+      <h1 class="red-text">LOVE & HATE</h1>
+      <h2>POS & STOCK</h2>
+    </div>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="admin-user" id="auth-panel">
+      <a href="login.html" id="btnSidebarLogin" style="color: white; text-decoration: none;">👤 LOGIN</a>
+      <p class="red-text italic">Menu View</p>
+    </div>
+    <div class="admin-actions" id="admin-links" style="display: none;">
+      <a href="admin.html" class="action-link">Entrar a POS ⟶</a>
+    </div>
+  </div>
+</aside>
+
+<!-- Área Principal -->
+<main class="main-content">
+  <!-- Barra superior -->
+  <header class="top-bar">
+    <button class="hamburger-btn" id="openMenu">☰</button>
+    <input type="text" class="search-input" placeholder="🔍 SEARCH" autofocus>
+  </header>
+
+  <!-- Filtros rápidos deslizables -->
+  <nav class="public-filters">
+    <button class="chip active" data-category="All">All</button>
+    <button class="chip" data-category="CDs">CD's</button>
+    <button class="chip" data-category="Vinyl">Viniles</button>
+    <button class="chip" data-category="Shirt">Playeras</button>
+    <button class="chip" data-category="Jewelry">Joyería</button>
+  </nav>
+
+  <!-- La Cuadrícula de Discos -->
+  <section class="catalog-grid">
+  </section>
+
+  <!-- Controles de Paginación -->
+  <div class="pagination">
+    <button class="page-btn">⟵</button>
+    <button class="page-btn active">1</button>
+    <button class="page-btn">2</button>
+    <button class="page-btn">3</button>
+    <span class="page-dots">...</span>
+    <button class="page-btn">12</button>
+    <button class="page-btn">⟶</button>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>   
+</body>
+</html>

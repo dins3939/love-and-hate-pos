@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOVE & HATE | POS</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Menú Lateral Oculto (Ahora dentro del body) -->
+  <aside class="sidebar" id="sidebar">
+    <button class="close-btn" id="closeMenu">✕</button>
+    
+    <div class="sidebar-top">
+      <div class="logo">
+        <h1 class="red-text">LOVE & HATE</h1>
+        <h2>POS & STOCK</h2>
+      </div>
+      <!-- Enlaces de navegación del Admin -->
+      <nav class="menu" style="margin-top: 40px;">
+
+        <!-- El enlace a la caja registradora  (con la clase 'active' porque estamos en esta página)-->
+        <a href="#" class="menu-btn active" style="text-decoration: none; display: block;">POS</a>
+        <!-- El enlace al inventario -->
+        <a href="admin.html" class="menu-btn" style="text-decoration: none; display: block;">Stock</a>
+        <!-- El enlace al Corte de Caja  -->
+        <a href="corte.html" class="menu-btn" style="text-decoration: none; display: block;">Corte</a>
+        
+      </nav>
+    </div>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="admin-user">
+        <p>👤 MIGUEL NEG</p>
+        <p class="red-text italic">Admin View</p>
+      </div>
+      <div class="admin-actions">
+        <a href="index.html" class="action-link">⟵ Menu View</a>
+        <button class="action-link log-off">Log Off</button>
+      </div>
+    </div>
+  </aside>
+  <!-- Contenedor maestro de toda la app -->
+  <div class="app-container">
+    <!-- Área Principal del POS -->
+    <main class="main-content pos-layout">
+      
+      <!-- LADO IZQUIERDO: Buscador / Escáner -->
+      <section class="pos-search-area">
+        <header class="top-bar">
+          <button class="hamburger-btn" id="openMenu">☰</button>
+          <input type="text" class="search-input" placeholder="🔍 SCAN BARCODE OR SEARCH" autofocus>
+        </header>
+
+        <!-- 1. BOTONES DE FILTRO -->
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+          <button class="filter-btn active" onclick="cambiarFiltro('All', this)">All</button>
+          <button class="filter-btn" onclick="cambiarFiltro('CD\'s', this)">CD's</button>
+          <button class="filter-btn" onclick="cambiarFiltro('Vinyl', this)">Vinilos</button>
+          <button class="filter-btn" onclick="cambiarFiltro('Shirt', this)">Playeras</button>
+        </div>
+
+        <!-- 2. CUADRÍCULA COMPACTA DE POS -->
+        <!-- Nota: Ajusté el calc(100vh - 180px) para dejarle espacio a los botones y la paginación -->
+        <div class="catalog-grid pos-compact-grid" style="margin-top: 15px; overflow-y: auto; height: calc(100vh - 180px);"></div>
+
+        <!-- 3. NÚMEROS DE PÁGINA -->
+        <div id="paginacion" style="display: flex; justify-content: center; gap: 10px; margin-top: 15px;"></div>
+      </section>
+
+      <!-- LADO DERECHO: El Ticket (Cart) -->
+      <aside class="pos-cart">
+        <h2 class="cart-title">CURRENT TICKET</h2>
+        
+        <!-- Contenedor vacío donde JS dibujará los items -->
+        <div class="cart-items" id="contenedorTicket"></div>
+
+        <div class="cart-totals">
+          <div class="total-row">
+            <span>Total Items:</span>
+            <span id="lblTotalItems">0</span>
+          </div>
+          <div class="total-row grand-total">
+            <span>TOTAL</span>
+            <span id="lblGrandTotal" class="red-text">$0 MXN</span>
+          </div>
+          
+          <button class="checkout-btn" onclick="procesarVenta()" id="btnCheckout">CHECKOUT</button>
+        </div>
+      </aside>
+
+    </main>
+  </div>
+  <!-- Librería de Supabase requerida para que app.js no falle -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+</body>
+</html>

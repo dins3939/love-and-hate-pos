@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOVE & HATE | LOGIN</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-body">
+  
+  <main class="login-container">
+    <div class="login-header">
+      <h1 class="red-text">LOVE & HATE</h1>
+      <h2>POS & STOCK SYSTEM</h2>
+    </div>
+
+    <!-- Cambiamos <form> por <div> para que JavaScript controle el acceso -->
+    <div class="login-form">
+      <div class="input-group">
+        <label>USUARIO (EMAIL)</label>
+        <!-- Agregamos id="loginEmail" -->
+        <input type="email" id="loginEmail" placeholder="Ingresa tu correo" required autofocus>
+      </div>
+      
+      <div class="input-group">
+        <label>CONTRASEÑA</label>
+        <!-- Agregamos id="loginPass" -->
+        <input type="password" id="loginPass" placeholder="••••••••" required>
+      </div>
+
+      <!-- Agregamos id="btnLogin" y quitamos type="submit" -->
+      <button type="button" id="btnLogin" class="checkout-btn login-btn">ENTRAR</button>
+    </div>
+    
+    <a href="index.html" class="back-link">⟵ Volver al catálogo público</a>
+  </main>
+
+  <!-- Librería de Supabase y tu lógica de conexión -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+</body>
+</html>
