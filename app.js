@@ -258,6 +258,7 @@ const rowHTML = `
           <img src="${item.image_url}" alt="cover" class="album-cover">
           <div class="album-info">
             <div class="album-text">
+              <p style="font-size: 10px; color: #888; text-transform: uppercase; margin: 4px 0 2px 0; letter-spacing: 1px;">${item.category}</p>
               <p class="album-title">${nombreAMostrar}</p>
               ${detallesRopaPOS} <!-- Los detalles de ropa inyectados en la tarjeta -->
               <p class="album-price" style="margin-top: 8px;">$${item.price} MXN</p>
