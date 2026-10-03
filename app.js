@@ -30,30 +30,6 @@ async function buscarPorCodigoDeBarras(codigo) {
   }
 }
 
-async function obtenerPreciosMercado(idDiscogs) {
-  try {
-    // Le ordenamos a la API que devuelva los datos directamente en Pesos Mexicanos
-    const url = `https://api.discogs.com/releases/${idDiscogs}?curr_abbr=MXN`;
-    const respuesta = await fetch(url, {
-      headers: { 'Authorization': `Discogs token=${discogsToken}` }
-    });
-    const datos = await respuesta.json();
-    
-    // Discogs ahora nos entrega este número ya convertido a MXN
-    const precioBaseMXN = datos.lowest_price || 0;
-    
-    // Calculamos las proyecciones en base al precio más bajo del mercado actual
-    return {
-      min: precioBaseMXN.toFixed(2),
-      med: (precioBaseMXN * 1.5).toFixed(2), 
-      max: (precioBaseMXN * 2).toFixed(2)  
-    };
-  } catch (error) {
-    return { min: 0, med: 0, max: 0 };
-  }
-}
-
-
 // =========================================
 // 3. FUNCIONES DE SUPABASE (LOCAL)
 // =========================================
@@ -187,24 +163,23 @@ function renderizarTarjetas(articulos) {
       `;
     }
 
-    if (esAdmin) {
+   if (esAdmin) {
       // Columna de Discogs SOLO para música
       let columnaDiscogs = '';
       if (item.category !== 'Shirt' && item.category !== 'Playeras') {
-      columnaDiscogs = `
-        <div class="col-extras">
-          <div class="row-col" style="width: 100%;">
-            <span class="col-label" style="font-size: 10px;">DISCOGS (MIN|MED|MAX)</span>
-            <span class="col-value" style="color: #aaa; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: bold;">
-              <span style="color: #ff3333;">$${item.price_min || 0}</span> | 
-              <span style="color: #37ff8e;">$${item.price_med || 0}</span> | 
-              <span style="color: #4da6ff;">$${item.price_max || 0}</span>
-              ${item.barcode ? `<button onclick="refrescarPrecioDiscogs('${item.id}', this)" style="background: none; border: none; cursor: pointer; color: #4da6ff;">🔄</button>` : ''}
-            </span>
+        columnaDiscogs = `
+          <div class="col-extras">
+            <div class="row-col" style="width: 100%;">
+              <span class="col-label" style="font-size: 10px;">MERCADO DISCOGS</span>
+              <span class="col-value" style="margin-top: 5px;">
+                ${item.discogs_url 
+                  ? `<a href="${item.discogs_url}" target="_blank" style="background: #4da6ff; color: #000; padding: 5px 10px; border-radius: 4px; text-decoration: none; font-size: 11px; font-weight: bold;">↗ VER PRECIOS</a>` 
+                  : `<span style="color: #aaa; font-size: 11px;">Sin enlace</span>`}
+              </span>
+            </div>
           </div>
-        </div>
-      `;
-    }
+        `;
+      }
 
       // DIBUJAR FILA (Admin) STOCK
 const rowHTML = `
@@ -400,7 +375,7 @@ if (btnCrearItem && modalNuevo && inputDiscogs) {
     modalNuevo.style.display = 'none';
   });
 
-  // Escáner de Discogs dentro del Modal
+ // Escáner de Discogs dentro del Modal
   inputDiscogs.addEventListener('keypress', async (evento) => {
     if (evento.key === 'Enter') {
       const codigo = evento.target.value.trim();
@@ -410,22 +385,20 @@ if (btnCrearItem && modalNuevo && inputDiscogs) {
       const disco = await buscarPorCodigoDeBarras(codigo); 
 
       if (disco) {
-        // Guardamos la imagen y el código en memoria
+        // Generamos el link oficial del marketplace
+        const urlDiscogs = `https://www.discogs.com/release/${disco.id}`;
+        
+        // Guardamos la imagen, el código y la URL en memoria
         discoTemporal = {
           barcode: codigo,
-          image_url: disco.cover_image
+          image_url: disco.cover_image,
+          discogs_url: urlDiscogs
         };
         
         // Llenamos el nombre
         document.getElementById('nuevoNombre').value = disco.title;
-        
-        // Buscamos y llenamos los precios
-        const precios = await obtenerPreciosMercado(disco.id);
-        document.getElementById('lblMin').innerText = precios.min;
-        document.getElementById('lblMed').innerText = precios.med;
-        document.getElementById('lblMax').innerText = precios.max;
-
-        document.getElementById('nuevoPrecioFinal').value = precios.med;
+        // Enfocamos el precio para que lo escribas rápido manualmente
+        document.getElementById('nuevoPrecioFinal').focus();
         
       } else {
         alert("Discogs no encontró este código de barras.");
@@ -443,17 +416,6 @@ if (btnCrearItem && modalNuevo && inputDiscogs) {
       const categoria = document.getElementById('nuevaCategoria').value;
       const precio = parseFloat(document.getElementById('nuevoPrecioFinal').value);
       let nombreFinal = document.getElementById('nuevoNombre').value;
-      
-      // NUEVO: Atrapamos Min, Med y Max de la interfaz
-      let precioMin = null;
-      let precioMed = null;
-      let precioMax = null;
-      
-      if (categoria !== "Shirt" && categoria !== "Playeras") {
-        precioMin = parseFloat(document.getElementById('lblMin').innerText) || null;
-        precioMed = parseFloat(document.getElementById('lblMed').innerText) || null;
-        precioMax = parseFloat(document.getElementById('lblMax').innerText) || null;
-      }
 
       // B. Si es ropa, armamos el nombre concatenado
       if (categoria === "Shirt" || categoria === "Playeras") {
@@ -472,7 +434,7 @@ if (btnCrearItem && modalNuevo && inputDiscogs) {
       console.log("Guardando en inventario...");
       btnGuardarSupabase.innerText = "GUARDANDO..."; 
 
-      // C. Insertamos a Supabase con las 3 columnas nuevas
+      // C. Insertamos a Supabase
       const { data, error } = await db.from('Inventory').insert([
         {
           barcode: discoTemporal ? discoTemporal.barcode : '',
@@ -481,9 +443,7 @@ if (btnCrearItem && modalNuevo && inputDiscogs) {
           price: precio,
           stock: 1, 
           image_url: discoTemporal ? discoTemporal.image_url : '',
-          price_min: precioMin,
-          price_med: precioMed,
-          price_max: precioMax
+          discogs_url: discoTemporal ? discoTemporal.discogs_url : null
         }
       ]);
 
@@ -502,9 +462,6 @@ if (btnCrearItem && modalNuevo && inputDiscogs) {
           document.getElementById('nuevoNombre').value = '';
           document.getElementById('nuevoPrecioFinal').value = '';
           if (document.getElementById('nuevoColor')) document.getElementById('nuevoColor').value = '';
-          document.getElementById('lblMin').innerText = '0';
-          document.getElementById('lblMed').innerText = '0';
-          document.getElementById('lblMax').innerText = '0';
           discoTemporal = null; 
 
           // Restaurar botón, cerrar ventana y refrescar catálogo
@@ -811,58 +768,6 @@ window.procesarVenta = async function() {
       btnCheckout.style.color = "#000";
     }
   } 
-};
-
-// =========================================
-// 9. ACTUALIZAR PRECIO DE MERCADO (DISCOGS)
-// =========================================
-window.refrescarPrecioDiscogs = async function(idArticulo, btnElement) {
-  try {
-    // 1. Encontrar el artículo para sacar su código de barras
-    const itemBD = inventarioGlobal.find(i => i.id == idArticulo);
-    if (!itemBD || !itemBD.barcode) {
-      alert("Este artículo no tiene código de barras guardado.");
-      return;
-    }
-
-    console.log(`Buscando nuevos precios para el código: ${itemBD.barcode}...`);
-    
-    // Cambiar el botón visualmente para que sepas que está cargando
-    const originalText = btnElement.innerHTML;
-    btnElement.innerHTML = "⏳";
-    btnElement.style.pointerEvents = "none";
-
-    // 2. Buscar en Discogs
-    const disco = await buscarPorCodigoDeBarras(itemBD.barcode);
-    if (!disco) throw new Error("No se encontró en Discogs");
-
-    // Traemos los tres precios
-    const precios = await obtenerPreciosMercado(disco.id);
-
-    // 3. Actualizamos LAS 3 COLUMNAS NUEVAS en Supabase
-    const { error } = await db.from('Inventory')
-      .update({
-        price_min: precios.min,
-        price_med: precios.med,
-        price_max: precios.max
-      })
-      .eq('id', idArticulo);
-
-    if (error) throw error;
-
-    console.log("¡Precios de mercado actualizados en Supabase!");
-
-    // 4. Recargar el catálogo para que la tarjeta se redibuje con los 3 números nuevos
-    await cargarCatalogo();
-
-  } catch (error) {
-    console.error("Error al refrescar precios:", error);
-    alert("Hubo un problema al contactar a Discogs o guardar en la base de datos.");
-    
-    // Restaurar el botón si falla
-    btnElement.innerHTML = "🔄";
-    btnElement.style.pointerEvents = "auto";
-  }
 };
 
 // =========================================
