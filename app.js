@@ -49,6 +49,7 @@ async function cargarCatalogo() {
 // MOTOR DE FILTRADO Y PAGINACIÓN
 // =========================================
 let filtroActual = 'All';
+let busquedaActual = ''; // NUEVA MEMORIA PARA EL BUSCADOR
 let paginaActual = 1;
 
 window.cambiarFiltro = function(categoria, boton) {
@@ -62,24 +63,27 @@ window.cambiarFiltro = function(categoria, boton) {
   actualizarVista();
 };
 
-window.cambiarPagina = function(numero) {
-  paginaActual = numero;
-  actualizarVista();
-};
-
 window.actualizarVista = function() {
   let datos = inventarioGlobal;
 
-  //Detectamos en qué pantalla estamos para definir el límite
   const esAdmin = document.querySelector('.inventory-list') !== null;
   const itemsPorPagina = esAdmin ? 60 : 30;
 
-  // 1. Filtrar
+  // 1. Filtrar por Categoría
   if (filtroActual !== 'All') {
     datos = datos.filter(item => item.category === filtroActual);
   }
 
-  // 2. Ordenar (Sin stock al fondo, luego alfabético)
+  // 2. Filtrar por Búsqueda (Buscador manual o Escáner)
+  if (busquedaActual !== '') {
+    datos = datos.filter(item => {
+      const titulo = (item.title || '').toLowerCase();
+      const codigo = (item.barcode || '').toLowerCase();
+      return titulo.includes(busquedaActual) || codigo.includes(busquedaActual);
+    });
+  }
+
+  // 3. Ordenar (Sin stock al fondo, luego alfabético)
   datos.sort((a, b) => {
     if (a.stock <= 0 && b.stock > 0) return 1;  
     if (a.stock > 0 && b.stock <= 0) return -1; 
@@ -88,13 +92,13 @@ window.actualizarVista = function() {
     return 0; 
   });
 
-  // 3. Paginar (Cortar la lista en rebanadas de 40)
+  // 4. Paginar (El corte de 30 o 60 discos estricto)
   const totalPaginas = Math.ceil(datos.length / itemsPorPagina) || 1;
   const inicio = (paginaActual - 1) * itemsPorPagina;
   const fin = inicio + itemsPorPagina;
   const datosPaginados = datos.slice(inicio, fin);
 
-  // 4. Dibujar Pantalla
+  // 5. Dibujar Pantalla
   renderizarTarjetas(datosPaginados);
   dibujarControlesPaginacion(totalPaginas);
 };
@@ -253,7 +257,6 @@ const rowHTML = `
 // Ejecutamos la carga inicial
 cargarCatalogo();
 
-
 // =========================================
 // 4. INTERFAZ Y NAVEGACIÓN
 // =========================================
@@ -266,62 +269,23 @@ if(openMenuBtn && closeMenuBtn && sidebar) {
   closeMenuBtn.addEventListener('click', () => sidebar.classList.remove('open'));
 }
 
-// Filtros de Categoría
-const botonesFiltro = document.querySelectorAll('.public-filters .chip');
-botonesFiltro.forEach(boton => {
-  boton.addEventListener('click', (evento) => {
-    botonesFiltro.forEach(btn => btn.classList.remove('active'));
-    
-    const botonClickeado = evento.target;
-    botonClickeado.classList.add('active');
-
-    const categoriaSeleccionada = botonClickeado.getAttribute('data-category');
-    
-    let resultadosFiltrados = categoriaSeleccionada === 'All' 
-      ? inventarioGlobal 
-      : inventarioGlobal.filter(item => item.category === categoriaSeleccionada);
-
-    renderizarTarjetas(resultadosFiltrados);
-  });
-});
-
-
 // =========================================
-// 5. BUSCADOR GLOBAL (SÓLO SUPABASE)
+// 5. BUSCADOR GLOBAL (INTEGRADO A PAGINACIÓN)
 // =========================================
 const searchInput = document.querySelector('.search-input');
 
 if (searchInput) {
-  // A. Búsqueda manual por texto (Teclado normal)
+  // A. Se ejecuta automáticamente mientras escribes o usas el escáner
   searchInput.addEventListener('input', (evento) => {
-    const textoBuscado = evento.target.value.toLowerCase();
-    const resultadosFiltrados = inventarioGlobal.filter(item => {
-      return item.title.toLowerCase().includes(textoBuscado);
-    });
-    renderizarTarjetas(resultadosFiltrados);
+    busquedaActual = evento.target.value.toLowerCase().trim();
+    paginaActual = 1; // Obligamos al sistema a regresar a la pag 1 en cada búsqueda
+    actualizarVista();
   });
 
-  // B. Búsqueda por Escáner Físico (Código + Enter)
+  // B. Bloquea la tecla "Enter" para que el escáner no recargue tu sitio web por error
   searchInput.addEventListener('keypress', (evento) => {
     if (evento.key === 'Enter') {
-      const codigoEscaneado = evento.target.value.trim();
-      if (!codigoEscaneado) return;
-
-      console.log("Buscando en Stock Local (Supabase)...");
-      
-      // Busca en la memoria global si el código coincide (asegúrate de que en Supabase tu columna se llame 'barcode')
-      const resultadosFiltrados = inventarioGlobal.filter(item => {
-        return item.barcode === codigoEscaneado || item.codigo_barras === codigoEscaneado;
-      });
-
-      if (resultadosFiltrados.length > 0) {
-        console.log("¡Encontrado en local!");
-        renderizarTarjetas(resultadosFiltrados);
-      } else {
-        alert("Este artículo NO está en tu inventario local.");
-      }
-      
-      evento.target.value = ''; // Limpia la barra para el siguiente escaneo
+      evento.preventDefault(); 
     }
   });
 }
