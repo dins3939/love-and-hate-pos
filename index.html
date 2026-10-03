@@ -50,15 +50,13 @@
   </section>
 
   <!-- Controles de Paginación -->
-  <div class="pagination">
-    <button class="page-btn">⟵</button>
-    <button class="page-btn active">1</button>
-    <button class="page-btn">2</button>
-    <button class="page-btn">3</button>
-    <span class="page-dots">...</span>
-    <button class="page-btn">12</button>
-    <button class="page-btn">⟶</button>
-  </div>
+  <div class="public-filters" style="display: flex; gap: 10px; margin-bottom: 20px;">
+  <button class="filter-btn active" onclick="cambiarFiltro('All', this)">All</button>
+  <button class="filter-btn" onclick="cambiarFiltro('CD\'s', this)">CD's</button>
+  <button class="filter-btn" onclick="cambiarFiltro('Vinyl', this)">Vinilos</button>
+  <button class="filter-btn" onclick="cambiarFiltro('Shirt', this)">Playeras</button>
+</div>
+    
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="app.js"></script>   
