@@ -174,7 +174,9 @@ function renderizarTarjetas(articulos) {
               <span class="col-value" style="margin-top: 5px;">
                 ${item.discogs_url 
                   ? `<a href="${item.discogs_url}" target="_blank" style="background: #4da6ff; color: #000; padding: 5px 10px; border-radius: 4px; text-decoration: none; font-size: 11px; font-weight: bold;">↗ VER PRECIOS</a>` 
-                  : `<span style="color: #aaa; font-size: 11px;">Sin enlace</span>`}
+                  : (item.barcode 
+                      ? `<button onclick="vincularDiscogsViejo('${item.id}', this)" style="background: transparent; color: #ffaa00; border: 1px solid #ffaa00; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px;">🔗 VINCULAR</button>` 
+                      : `<span style="color: #555; font-size: 11px;">Falta código de barras</span>`)}
               </span>
             </div>
           </div>
@@ -768,6 +770,43 @@ window.procesarVenta = async function() {
       btnCheckout.style.color = "#000";
     }
   } 
+};
+
+// =========================================
+// 9. VINCULAR DISCOS VIEJOS A DISCOGS
+// =========================================
+window.vincularDiscogsViejo = async function(idArticulo, btnElement) {
+  try {
+    const itemBD = inventarioGlobal.find(i => i.id == idArticulo);
+    if (!itemBD || !itemBD.barcode) return;
+
+    // Efecto visual de carga
+    btnElement.innerHTML = "⏳ BUSCANDO...";
+    btnElement.style.pointerEvents = "none";
+
+    // 1. Buscar en Discogs usando el código viejo
+    const disco = await buscarPorCodigoDeBarras(itemBD.barcode);
+    if (!disco) throw new Error("No encontrado");
+
+    // 2. Generar el link oficial
+    const urlDiscogs = `https://www.discogs.com/release/${disco.id}`;
+
+    // 3. Guardar el link en Supabase
+    const { error } = await db.from('Inventory')
+      .update({ discogs_url: urlDiscogs })
+      .eq('id', idArticulo);
+
+    if (error) throw error;
+
+    // 4. Refrescar la pantalla para que aparezca el botón azul
+    await cargarCatalogo();
+
+  } catch (error) {
+    console.error("Error al vincular:", error);
+    alert("Discogs no reconoció este código de barras.");
+    btnElement.innerHTML = "🔗 REINTENTAR";
+    btnElement.style.pointerEvents = "auto";
+  }
 };
 
 // =========================================
