@@ -474,6 +474,7 @@ window.abrirEdicion = function(id) {
   document.getElementById('editStock').value = item.stock;
   document.getElementById('editBarcode').value = item.barcode || '';
   document.getElementById('editImagen').value = item.image_url || '';
+  document.getElementById('editDiscogsUrl').value = item.discogs_url || '';
   document.getElementById('editNombre').value = item.title;
 
   // Llenamos los campos de ropa directamente desde la base de datos
@@ -491,6 +492,7 @@ window.abrirEdicion = function(id) {
   document.getElementById('modalEditarItem').style.display = 'flex';
 };
 
+
 // C. Botón de Actualizar en Supabase
 const btnGuardarEdicion = document.getElementById('btnGuardarEdicion');
 if (btnGuardarEdicion) {
@@ -499,14 +501,15 @@ if (btnGuardarEdicion) {
 
     const nuevaCat = document.getElementById('editCategoria').value;
     
-    // Preparamos el paquete de datos a actualizar
+   // Preparamos el paquete de datos a actualizar
     const datosActualizados = { 
       title: document.getElementById('editNombre').value, 
       price: parseFloat(document.getElementById('editPrecio').value), 
       stock: parseInt(document.getElementById('editStock').value),
       category: nuevaCat,
       barcode: document.getElementById('editBarcode').value,
-      image_url: document.getElementById('editImagen').value
+      image_url: document.getElementById('editImagen').value,
+      discogs_url: document.getElementById('editDiscogsUrl').value
     };
 
     // Si es ropa, agregamos los campos extra a sus columnas en Supabase
