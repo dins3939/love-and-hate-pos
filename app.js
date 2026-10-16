@@ -352,6 +352,17 @@ if (btnCrearItem && modalNuevo && inputDiscogs) {
         return;
       }
 
+      // --- NUEVO: BLOQUEO DE DISCOS DUPLICADOS ---
+      if (discoTemporal && discoTemporal.barcode) {
+        const discoRepetido = inventarioGlobal.find(item => item.barcode === discoTemporal.barcode);
+        
+        if (discoRepetido) {
+          alert(`¡ALTO! Este código de barras ya está registrado:\n\n📀 ${discoRepetido.title}\n\nPara evitar duplicados, búscalo en tu inventario y edita el stock manualmente.`);
+          return; // Esto "corta" la función y evita que se guarde en Supabase
+        }
+      }
+      // -------------------------------------------
+
       btnGuardarSupabase.innerText = "GUARDANDO..."; 
       const { data, error } = await db.from('Inventory').insert([{
         barcode: discoTemporal ? discoTemporal.barcode : '',
